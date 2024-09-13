@@ -34,6 +34,21 @@ function read_data(
     return wavefct, energy
 end
 
+function make_plot(
+    xlabel:: String,
+    ylabel:: String,
+    title:: String,
+    x_data :: Any,
+    y_data:: Any,
+    savepath:: String,
+)
+    plot(x_data, y_data)
+    xlabel!(xlabel)
+    ylabel!(ylabel)
+    title!(title)
+    savefig(savepath)  
+end
+
 if abspath(PROGRAM_FILE) == @__FILE__
     using Plots
     counter = 0
@@ -69,22 +84,9 @@ if abspath(PROGRAM_FILE) == @__FILE__
         push!(magnetisation, magnet)
         println("finished loop $counter")
     end
-    
-    xlabel!("h/J")
-    ylabel!("magnetisation")
-    plot(hdivJ,magnetisation)
-    savefig("magnet.png")  
-
-    xlabel!("h/J")
-    ylabel!("energy")
-    plot(hdivJ,ge )
-    savefig("energy.png")
-
-    xlabel!("h/J")
-    ylabel!("energy difference")
-    plot(hdivJ, fe-ge)
-    savefig("difference.png")
-
+    make_plot("h/J", "Energy", "Ground State Energy, J=1", hdivJ, ge, "/Users/salsa/TensorNetworks/ising_model_mps/visuals/data_2/energy.png" )
+    make_plot("h/J", "Energy Difference", "Ground State vs 1st Excited State, J=1", hdivJ, fe-ge, "/Users/salsa/TensorNetworks/ising_model_mps/visuals/data_2/energy_difference.png" )
+    make_plot("h/J", "<Sum Sx>", "Magnetization", hdivJ, magnetisation, "/Users/salsa/TensorNetworks/ising_model_mps/visuals/data_2/magnetisation.png" )
 
 end
 
