@@ -17,7 +17,7 @@ function main()
   end
   lattice_size = args["lattice_size"]
   J = args["J"]
-  h = args["h"]
+  hdivJ = args["hdivJ"]
   Dmax = args["Dmax"]
   weight = args["weight"]
   sweep_round = args["sweep_round"]
@@ -25,7 +25,7 @@ function main()
   datapath = args["folder"]
   seed = args["seed"]
 
-  os = ising(h, J, lattice_size)
+  os = ising(hdivJ, J, lattice_size)
   sites = siteinds("S=1/2", lattice_size)
   H = MPO(os, sites)
 
@@ -87,7 +87,7 @@ function main()
   end
 
   ## save results
-  filename = string(datapath, "lattice_size", lattice_size, "J", J, "D", Dmax, "K", K,"h", h, ".h5")
+  filename = string(datapath, "lattice_size", lattice_size, "J", J, "D", Dmax, "K", K,"hdivJ", hdivJ, ".h5")
   println("data save path: ", filename)
   f = h5open(filename, "w")
   for m = 1:K
