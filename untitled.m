@@ -1,0 +1,1 @@
+info = h5info("/Users/salsa/TensorNetworks/ising_model_mps/data/lattice_size5J1D100K4h1.h5")
