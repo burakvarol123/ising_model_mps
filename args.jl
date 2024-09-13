@@ -18,7 +18,7 @@ function parse_commandline()
        "--K"
            help = "the number of states calculated by dmrg"
            arg_type = Int
-           default = 4
+           default = 2
        "--folder"
            help = "where to store the results"
            default = "./data/"
@@ -29,7 +29,7 @@ function parse_commandline()
        "--loadK"
            help = "load the loadK state"
            arg_type = Int
-           default = 4
+           default = 2
        "--initD"
            help = "initialize the state with bond dimension initD"
            arg_type = Int
@@ -50,11 +50,11 @@ function parse_commandline()
             arg_type = Int
             default = 5
         "--J"
-            arg_type = Any  
-            default = 1
-        "--h"
-            arg_type = Any
-            default = 1  
+            arg_type = Float64  
+            default = 1.0
+        "--hdivJ"
+            arg_type = Float64
+            default = 1.0 
     end
     return parse_args(s)
 end
