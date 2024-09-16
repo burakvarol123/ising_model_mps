@@ -12,12 +12,29 @@ function magnetization(
     
     os = OpSum()
     for i = 1 : lattice_size
-        os += -hdivJ * J, "Sx", i
+        os += 1/lattice_size, "Sz", i
     end 
     sites = siteinds(psi)
     mag = MPO(os, sites)
-    magnet = inner(psi', mag, psi)
+    magnet = inner(psi', apply(mag,mag), psi)
+
     return magnet
+end
+
+function binder_cumulant(
+    lattice_size:: Int,
+    psi:: MPS,
+)
+    os = OpSum()
+    for i = 1 : lattice_size
+        os += 1/lattice_size, "Sz", i
+    end 
+    sites = siteinds(psi)
+    mag = MPO(os, sites)
+    mag_2 = inner(psi', apply(mag,mag), psi)
+    mag_4= inner(psi', apply(mag,apply(mag,apply(mag,mag))), psi)
+    coef = 1- mag_4/3*mag_2^2
+    return coef
 end
 
 function read_data(
@@ -42,29 +59,31 @@ function make_plot(
     y_data:: Any,
     savepath:: String,
 )
-    plot(x_data, y_data)
+    plot(x_data, y_data, marker=:circle)
     xlabel!(xlabel)
     ylabel!(ylabel)
     title!(title)
     savefig(savepath)  
 end
 
+
 if abspath(PROGRAM_FILE) == @__FILE__
     using Plots
-    counter = 0
-
-    data_folder = "/Users/salsa/TensorNetworks/ising_model_mps/data_2"
+    #Start evaluating magnetisation, gs energy and energy gap
+    
+    data_folder = "/Users/salsa/TensorNetworks/ising_model_mps/data"
     files = readdir(data_folder)
     ener = []
     ge = []
     fe=[]
     magnetisation =[]
     wavefunctions = []
-    gs = []
+    lattice_size = 100
+    number_states = 4
     hdivJ = 0.1:0.1:2
     for file in files
         file_path = joinpath(data_folder, file)
-        dataset = read_data(file_path, 2)  
+        dataset = read_data(file_path, number_states)  
         push!(ener, dataset[2])
         push!(wavefunctions, dataset[1])
         println("Read datasets: " , file)
@@ -73,21 +92,47 @@ if abspath(PROGRAM_FILE) == @__FILE__
         push!(ge, energy[1])
         push!(fe, energy[2])
     end
+    #@show ener
+    #exit() to show yibin the comparisons between energies of his script
+    counter = 0
     for state in wavefunctions
-        push!(gs, state[1])
-    end
-    
-    for state in gs
         global counter
         counter += 1
-        magnet = magnetization(100, state,hdivJ[counter], 1 )
+        gs = state[1]
+        magnet = magnetization(lattice_size, gs,hdivJ[counter], 1 )
         push!(magnetisation, magnet)
         println("finished loop $counter")
     end
-    make_plot("h/J", "Energy", "Ground State Energy, J=1", hdivJ, ge, "/Users/salsa/TensorNetworks/ising_model_mps/visuals/data_2/energy.png" )
-    make_plot("h/J", "Energy Difference", "Ground State vs 1st Excited State, J=1", hdivJ, fe-ge, "/Users/salsa/TensorNetworks/ising_model_mps/visuals/data_2/energy_difference.png" )
-    make_plot("h/J", "<Sum Sx>", "Magnetization", hdivJ, magnetisation, "/Users/salsa/TensorNetworks/ising_model_mps/visuals/data_2/magnetisation.png" )
+    
+    make_plot("h/J", "Energy", "Ground State Energy, J=1", hdivJ, ge, "/Users/salsa/TensorNetworks/ising_model_mps/visuals/data/energy.png" )
+    make_plot("h/J", "Energy Difference", "Ground State vs 1st Excited State, J=1", hdivJ, fe-ge, "/Users/salsa/TensorNetworks/ising_model_mps/visuals/data/energy_difference.png" )
+    make_plot("h/J", "<Sum Sz^2>", "Magnetization^2", hdivJ, magnetisation, "/Users/salsa/TensorNetworks/ising_model_mps/visuals/data/magnetisationsz2.png" )
 
+    #exit() exit if you dont want the binder cumulant. 
+    # Start Binder cumulant, you might have to adjust the file names. I assumed that I always would give multiples of 50 as lattice sizes
+    
+    binder_cumulants = Dict{String, Vector{Any}}()
+    hdivJ = 0.0:0.1:2
+    num_datasets = 5
+    for i in 1:num_datasets
+        binder_cumulants["binder_cumulant_$(i*50)"] = []
+        data_folder = "/Users/salsa/TensorNetworks/ising_model_mps/data_$(i*50)"
+        files = readdir(data_folder)
+        for file in files
+            file_path = joinpath(data_folder, file)
+            dataset = read_data(file_path, 2)  
+            wavefunction = dataset[1]
+            binder = binder_cumulant(i*50, wavefunction[1])
+            push!(binder_cumulants["binder_cumulant_$(i*50)"], binder)
+        end
+        println("Finished:", data_folder)
+        plot!( hdivJ, binder_cumulants["binder_cumulant_$(i*50)"], label= ["lenght = $(i*50)"], legend=:bottomright , marker =:circle)
+        xlabel!("hdivJ")
+        ylabel!("U")
+        title!("Binder Cumulants")
+
+    end
+    savefig("/Users/salsa/TensorNetworks/ising_model_mps/visuals/binder_cumulant")   
 end
 
 
