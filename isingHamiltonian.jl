@@ -22,6 +22,7 @@ function ising(
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
+    #Little test
     hdivJ, J , lattice_size = 0.1, 1.0 , 5
     isingh= ising(hdivJ,J,lattice_size)
     @show isingh
