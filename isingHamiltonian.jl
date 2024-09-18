@@ -9,7 +9,7 @@ function ising(
     #nearest neigbour
     os = OpSum()
     for i = 1: lattice_size 
-        if i+1 < lattice_size
+        if i < lattice_size
             os += -J,"Sz", i , "Sz", i+1
         end
     end
