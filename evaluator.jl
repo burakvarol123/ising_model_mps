@@ -88,7 +88,7 @@ if abspath(PROGRAM_FILE) == @__FILE__
     using Plots
     #Start evaluating magnetisation, gs energy and energy gap
     
-    data_folder = "/Users/salsa/TensorNetworks/ising_model_mps/simulation_data/data"
+    data_folder = "/Users/salsa/TensorNetworks/ising_model_mps/simulation_data/data_comp"
     files = readdir(data_folder)
     ener = []
     ge = []
@@ -109,8 +109,8 @@ if abspath(PROGRAM_FILE) == @__FILE__
         push!(ge, energy[1])
         push!(fe, energy[2])
     end
-    #@show ener
-    #exit() to show yibin the comparisons between energies of his script
+    @show ener
+    exit() #to show yibin the comparisons between energies of his script
     counter = 0
     for state in wavefunctions
         global counter
